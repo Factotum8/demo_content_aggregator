@@ -14,7 +14,8 @@ setup(
         "aiopg==1.0.0",
         "peewee==3.13.3",
         "peewee-async==0.7.0",
-        "marshmallow>=3.10.0"
+        "marshmallow>=3.10.0",
+        "Marshmallow-Peewee>=3.0.0"
     ],
 
     # tests_require - New in 41.5.0: Deprecated the test command.

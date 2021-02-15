@@ -10,14 +10,16 @@ services:
       - postgres_data:/var/lib/postgresql/data/
     env_file:
       - ./.db_env.yaml
-
-  web:
-    container_name: web
-    build: .
-#    restart: always
     ports:
-      - "8072:8072"
-    depends_on:
-      - db
-    env_file:
-      - ./.env.yaml
+    - "5432:5432"
+
+#  web:
+#    container_name: web
+#    build: .
+##    restart: always
+#    ports:
+#      - "8072:8072"
+#    depends_on:
+#      - db
+#    env_file:
+#      - ./.env.yaml

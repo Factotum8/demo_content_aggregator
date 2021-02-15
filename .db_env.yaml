@@ -1,5 +1,5 @@
-DB_ENGINE=django.db.backends.postgresql
-DB_NAME=postgres
+#DB_ENGINE=django.db.backends.postgresql
+DB_NAME=aggregator
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=postgres
 DB_HOST=db

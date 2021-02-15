@@ -27,8 +27,8 @@ class ServerAggregator:
                                                                         config=config)
         self.log = self.logging_repository_.log  # init log obj
         # ORM peewee-async
-        # self._database = peewee_models.PeeweeRepositoryBuilder()(peewee_models, config)  # init db connect
-        # self.dao = peewee_models.Manager(self._database)  # init data access object
+        self._database = peewee_models.PeeweeRepositoryBuilder()(peewee_models, config)  # init db connect
+        self.dao = peewee_models.Manager(self._database)  # init data access object
 
         self._app = web.Application()
         self._app.on_startup.append(self._initialize)
@@ -42,15 +42,19 @@ class ServerAggregator:
 
     async def _page_handler(self, request):
         page_id = request.match_info.get('page_id', 1)
+        self.log.debug('_page_handler')
         return web.Response(text=f'page id {page_id}')
 
     async def _pages_handler(self, request):
+        self.log.debug('_pages_handler')
         return web.Response(text="hello")
 
     async def _initialize(self, app):
+        self.log.debug('start')
         pass
 
     async def _terminate(self, app):
+        self.log.debug('end')
         pass
 
     def listen(self):

@@ -12,11 +12,13 @@ import peewee_asyncext
 from peewee_async import Manager
 from peewee import PeeweeException, DoesNotExist, ModelSelect, CharField
 from playhouse.postgres_ext import JSONField
+from marshmallow_peewee import ModelSchema
+from marshmallow import Schema, fields
 from playhouse.shortcuts import model_to_dict
 
 from mypackages import settings_loader
 
-__all__ = ['PeeweeException', 'BaseRepositoryPeeweeException', 'PeeweeRepositoryBuilder', 'Manager']
+__all__ = ['PeeweeException', 'BaseRepositoryPeeweeException', 'PeeweeRepositoryBuilder', 'Manager', 'Pages', 'Blocks']
 
 ENV_PREFIX = 'AGGREGATOR_'  # We delete this prefix from environment variables
 # This instruction is the correct way to dynamically defining a database
@@ -77,7 +79,7 @@ class PagesBlocksRelationship(BaseModel):
     There is a many-to-many relationship for pages & block
     """
     page_id = peewee.ForeignKeyField(Pages, db_column='page_id', help_text='foreign key to table "pages"')
-    block_id = peewee.ForeignKeyField(Pages, db_column='block_id', help_text='foreign key to table "block"')
+    block_id = peewee.ForeignKeyField(Blocks, db_column='block_id', help_text='foreign key to table "block"')
     order_by = peewee.SmallIntegerField(null=True, db_column='blocks_order_by', help_text='blocks order for viewing')
 
     class Meta:
@@ -92,6 +94,7 @@ class PeeweeRepositoryBuilder:
     """
     Create data access object
     """
+
     def __init__(self):
         self.module = None
 
@@ -121,7 +124,36 @@ class PeeweeRepositoryBuilder:
         return module.get_postgresql_database(config)
 
 
-def _migration():
+class BaseSchema(ModelSchema):
+    """
+    Base marshmallow schema
+    """
+
+
+class PagesSchema(BaseSchema):
+    class Meta:
+        model = Pages
+
+
+class BlocksSchema(BaseSchema):
+    class Meta:
+        model = Blocks
+
+
+def migration():
+    # page = Pages(name='main_page', slug='main_page_slug', order_by=10)
+    page = Pages().create(name='main_page', slug='main_page_slug', order_by=10)
+    block_1 = Blocks().create(name='first_block', links='https://www.youtube.com/', order_by=10, viewed_count=0)
+    block_2 = Blocks().create(name='second_block', links='https://www.youtube.com/', order_by=20, viewed_count=0)
+    relationship = [PagesBlocksRelationship().create(page_id=1, block_id=block_1.id, order_by=20),
+                    PagesBlocksRelationship().create(page_id=1, block_id=block_2.id, order_by=10)]
+    # page.save()
+    # block_1.save()
+    # block_2.save()
+    # relationship[0].save()
+    # relationship[1].save()
+
+    r = PagesSchema().dump(page)
     pass
 
 
@@ -133,8 +165,8 @@ def main(path):
     database = get_postgresql_database(config)
     DATABASE.initialize(database)
     DATABASE.connect()
-    DATABASE.create_tables([])
-    _migration()
+    DATABASE.create_tables([Pages, Blocks, PagesBlocksRelationship])
+    migration()
     DATABASE.close()
 
 
