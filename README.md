@@ -27,6 +27,17 @@ It is test task by applying for job.
 1. Follow to project directory (Directory contains README.md file).
 2. Execute: `sudo docker-compose up` 
 
+## Sources
+* /content_aggregator/content_aggregator.py - main module  
+  Project submodules:
+* /mypackages/logging_repository.py
+* /mypackages/peewee_models.py
+* /mypackages/settings_loader.py
+
+### Configure files
+* .db_env.yaml - config for db  
+* .env.yaml - config for application
+
 ## Migration
 1. Follow to project directory (Directory contains README.md file).
 2. Create or activate environment python by any way.

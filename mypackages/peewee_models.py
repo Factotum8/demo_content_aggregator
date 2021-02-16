@@ -56,6 +56,9 @@ def init_postgresql_database(config: dict):
 
 
 class Pages(BaseModel):
+    """
+    Model for table pages
+    """
     name = peewee.CharField(null=True, db_column='name', help_text='page name')
     slug = peewee.CharField(null=True, db_column='slug', help_text='slug for url', index=True)
     order_by = peewee.SmallIntegerField(null=True, db_column='order_by', help_text='order for viewing')
@@ -68,6 +71,9 @@ class Pages(BaseModel):
 
 
 class Blocks(BaseModel):
+    """
+    Model for table blocks
+    """
     name = peewee.CharField(null=True, db_column='name', help_text='block name')
     links = JSONField(null=True, db_column='links', help_text='it is links video staff for block')
     viewed_count = peewee.IntegerField(null=True, db_column='viewed_count', help_text='contain viewed count')
@@ -99,6 +105,7 @@ class PagesBlocksRelationship(BaseModel):
         database = DATABASE  # closure
         # unique together page & block
         indexes = (
+            # a unique if True
             (('page_id', 'block_id'), True),  # Note the trailing comma!
         )
 
