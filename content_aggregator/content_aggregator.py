@@ -36,7 +36,6 @@ class ServerAggregator:
         self._app.on_startup.append(self._initialize)
         self._app.on_shutdown.append(self._terminate)
 
-        # TODO
         self._app.add_routes([
             web.get(ServerAggregator.paths_parts[0], self._pages_handler),  # list pages
             web.get(f'{ServerAggregator.paths_parts[1]}/{{page_slug}}', self._page_handler),  # list block on page
@@ -69,51 +68,8 @@ class ServerAggregator:
             raise
 
         # You can specify which fields to output with the only parameter: b.model_to_dict(only=['id'])
-        blocks_serialize = [await b.model_to_dict() for b in blocks_obj]
+        blocks_serialize = [await b.model_to_dict_and_inc_viewed() for b in blocks_obj]
         return web.json_response(blocks_serialize)
-
-    async def _page_handler_(self, request):
-        # TODO maybe validate url
-        page_slug = request.match_info.get('page_slug', None)
-        self.log.debug(f'request page with slug: {page_slug}')
-        if not page_slug:
-            raise web.HTTPBadRequest()
-
-        try:
-            page_obj = await self.dao.get(peewee_models.Pages, slug=page_slug)
-            # relations = await self.dao.execute(peewee_models.PagesBlocksRelationship.select())
-            # relations = await (self.dao.get(peewee_models.PagesBlocksRelationship.select()
-            #                                 .join(peewee_models.Blocks, on=(peewee_models.Blocks.id == peewee_models.PagesBlocksRelationship.block_id)
-            #                                 ).where(peewee_models.PagesBlocksRelationship.page_id == page_obj.id
-            #                                         ))
-            # )
-
-            # TODO join table relation & block
-            blocks_obj = await (
-                self.dao.execute(peewee_models.PagesBlocksRelationship.select(
-                ).join(
-                    peewee_models.Blocks, on=(peewee_models.Blocks.id == peewee_models.PagesBlocksRelationship.block_id)
-                ).where(
-                    peewee_models.PagesBlocksRelationship.page_id == page_obj.id
-                ).group_by(
-                    [peewee_models.PagesBlocksRelationship.id, peewee_models.PagesBlocksRelationship.order_by]))
-            )
-            # blocks_id = [relation.id for relation in relations]
-            # blocks_obj = await self.dao.execute(peewee_models.Blocks.select().where(
-            #     peewee_models.Blocks.id in blocks_id))
-            blocks_serialize = [await b.model_to_json() for b in sorted(blocks_obj, key=lambda inst: inst.order_by)]
-            pass
-
-        except peewee_models.DoesNotExist as e:
-            self.log.debug(f'{e}')
-            raise web.HTTPFound('/redirect')
-        except peewee_models.PeeweeException as e:
-            self.log.error(f"connection DB error: {e}")
-            raise
-
-        self.log.debug(f'return page id: {page_obj.id}')
-        # return web.Response(text=await page_obj.model_to_json())
-        return web.Response(text=await page_obj.model_to_json())
 
     async def _pages_handler(self, request):
         self.log.debug('request pages list')
@@ -127,12 +83,6 @@ class ServerAggregator:
         pages_serialize = [
             {'name': p.name, 'link': f'http://{request.host}{ServerAggregator.paths_parts[1]}/{p.slug}'}
             for p in pages_obj]
-
-        # pages_serialize = []
-        # for p in pages_obj:
-        #     pages_serialize.append(dict(
-        #         name=p.name,
-        #         link=f'http://{request.host}{ServerAggregator.paths_parts[1]}/{p.slug}'))
 
         return web.json_response(pages_serialize)
 

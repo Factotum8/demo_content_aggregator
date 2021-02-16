@@ -3,24 +3,15 @@
 """
 Models for ORM peewee-async
 """
-import argparse
-from datetime import datetime
-from typing import Any, Callable
-import json
-
 import peewee
 import peewee_asyncext
 from peewee_async import Manager
-from peewee import PeeweeException, DoesNotExist, ModelSelect, CharField
+from peewee import PeeweeException, DoesNotExist
 from playhouse.postgres_ext import JSONField
 from marshmallow_peewee import ModelSchema
-from marshmallow import Schema, fields
-from playhouse.shortcuts import model_to_dict
-
-from mypackages import settings_loader
 
 __all__ = ['PeeweeException', 'BaseRepositoryPeeweeException', 'PeeweeRepositoryBuilder', 'Manager', 'Pages', 'Blocks',
-           'DoesNotExist']
+           'DoesNotExist', 'DATABASE', 'get_postgresql_database', 'PagesBlocksRelationship', 'ENV_PREFIX']
 
 ENV_PREFIX = 'AGGREGATOR_'  # We delete this prefix from environment variables
 # This instruction is the correct way to dynamically defining a database
@@ -69,10 +60,10 @@ class Pages(BaseModel):
     slug = peewee.CharField(null=True, db_column='slug', help_text='slug for url', index=True)
     order_by = peewee.SmallIntegerField(null=True, db_column='order_by', help_text='order for viewing')
 
-    async def model_to_json(self, **kwargs):
+    async def model_to_json(self, **kwargs) -> str:
         return PagesSchema(**kwargs).dumps(self)
 
-    async def model_to_dict(self, **kwargs):
+    async def model_to_dict(self, **kwargs) -> dict:
         return PagesSchema(**kwargs).dump(self)
 
 
@@ -81,11 +72,19 @@ class Blocks(BaseModel):
     links = JSONField(null=True, db_column='links', help_text='it is links video staff for block')
     viewed_count = peewee.IntegerField(null=True, db_column='viewed_count', help_text='contain viewed count')
 
-    async def model_to_json(self, **kwargs):
+    async def model_to_json(self, **kwargs) -> str:
         return BlocksSchema(**kwargs).dumps(self)
 
-    async def model_to_dict(self, **kwargs):
+    async def model_to_dict(self, **kwargs) -> dict:
         return BlocksSchema(**kwargs).dump(self)
+
+    async def model_to_dict_and_inc_viewed(self, **kwargs) -> dict:
+        """
+        Convert model's object to dict and INCREMENT counter from db
+        """
+        self.viewed_count += 1
+        self.save()
+        return await self.model_to_dict(**kwargs)
 
 
 class PagesBlocksRelationship(BaseModel):
@@ -98,12 +97,12 @@ class PagesBlocksRelationship(BaseModel):
 
     class Meta:
         database = DATABASE  # closure
-        # TODO unique together page & block
+        # unique together page & block
         indexes = (
             (('page_id', 'block_id'), True),  # Note the trailing comma!
         )
 
-    async def model_to_json(self, **kwargs):
+    async def model_to_json(self, **kwargs) -> str:
         return RelationshipSchema(**kwargs).dumps(self)
 
 
@@ -162,48 +161,5 @@ class RelationshipSchema(BaseSchema):
         model = PagesBlocksRelationship
 
 
-def create_fixture():
-    """
-    Insert into DB and create fixture file
-    """
-    page = Pages().create(name='main_page', slug='main_page_slug', order_by=10)
-    block_1 = Blocks().create(name='first_block', links='https://www.youtube.com/', viewed_count=0)
-    block_2 = Blocks().create(name='second_block', links='https://www.youtube.com/', viewed_count=0)
-    relationship_1 = PagesBlocksRelationship().create(page_id=page.id, block_id=block_1.id, order_by=20)
-    relationship_2 = PagesBlocksRelationship().create(page_id=page.id, block_id=block_2.id, order_by=10)
-
-    page_2 = Pages().create(name='second_page', slug='second_page_slug', order_by=20)
-    block_3 = Blocks().create(name='third_block', links='https://www.youtube.com/', viewed_count=0)
-    relationship_3 = PagesBlocksRelationship().create(page_id=page_2.id, block_id=block_3.id, order_by=10)
-
-    # Dump fixture to file
-    # with open('./fixture_tmp.json', 'w') as f:
-    #     json.dump(dict(pages=[PagesSchema().dump(page)],
-    #                    blocks=[BlocksSchema().dump(block_1), BlocksSchema().dump(block_2)],
-    #                    relationship=[RelationshipSchema().dump(relationship_1),
-    #                                  RelationshipSchema().dump(relationship_2)]),
-    #               f)
-
-
-def main(path, with_fixture=False):
-    """
-    Init migration
-    inset test data
-    """
-    config = settings_loader.load_config(prefix=ENV_PREFIX, path_to_config=path)
-    database = get_postgresql_database(config)
-    DATABASE.initialize(database)
-    DATABASE.connect()
-    DATABASE.create_tables([Pages, Blocks, PagesBlocksRelationship])
-    if with_fixture:
-        create_fixture()
-    DATABASE.close()
-
-
 if __name__ == '__main__':
-    arg_parser = argparse.ArgumentParser()
-    arg_parser.add_argument("-p", action='store', type=str, dest='PATHTOCONFIG',
-                            help="Specify the path to the config  file")
-    args = arg_parser.parse_args()
-    # TODO put True
-    main(args.PATHTOCONFIG, True)
+    pass
