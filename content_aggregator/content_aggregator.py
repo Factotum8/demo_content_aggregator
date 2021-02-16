@@ -74,7 +74,9 @@ class ServerAggregator:
     async def _pages_handler(self, request):
         self.log.debug('request pages list')
         try:
-            pages_obj = await self.dao.execute(peewee_models.Pages.select())
+            pages_obj = await (self.dao.execute(peewee_models.Pages.select(
+            ).order_by(
+                peewee_models.Pages.order_by)))
 
         except (peewee_models.DoesNotExist, peewee_models.PeeweeException) as e:
             self.log.error(f"connection DB error: {e}")
