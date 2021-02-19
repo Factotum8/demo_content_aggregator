@@ -60,7 +60,7 @@ class Pages(BaseModel):
     Model for table pages
     """
     name = peewee.CharField(null=True, db_column='name', help_text='page name')
-    slug = peewee.CharField(null=True, db_column='slug', help_text='slug for url', index=True)
+    slug = peewee.CharField(null=True, db_column='slug', help_text='slug for url', index=True, unique=True)
     order_by = peewee.SmallIntegerField(null=True, db_column='order_by', help_text='order for viewing', index=True)
 
     async def model_to_json(self, **kwargs) -> str:
