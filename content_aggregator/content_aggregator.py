@@ -17,8 +17,6 @@ class ServerAggregator:
     """
     Main class
     """
-    paths_parts = ['/pages', '/page']
-
     def __init__(self, config: Dict[str, Union[str, int]]):
         self.log = None
         self._config = config
@@ -37,8 +35,9 @@ class ServerAggregator:
         self._app.on_shutdown.append(self._terminate)
 
         self._app.add_routes([
-            web.get(ServerAggregator.paths_parts[0], self._pages_handler),  # list pages
-            web.get(f'{ServerAggregator.paths_parts[1]}/{{page_slug}}', self._page_handler),  # list block on page
+            web.get('/pages', self._pages_handler, name='pages'),  # list pages
+            # list block on page
+            web.get('/page/{page_slug}', self._page_handler, name='page'),
         ])
 
     async def _page_handler(self, request):
@@ -83,7 +82,7 @@ class ServerAggregator:
             raise
 
         pages_serialize = [
-            {'name': p.name, 'link': f'http://{request.host}{ServerAggregator.paths_parts[1]}/{p.slug}'}
+            {'name': p.name, 'link': str(request.url.join(request.app.router['page'].url_for(page_slug=p.slug)))}
             for p in pages_obj]
 
         return web.json_response(pages_serialize)
