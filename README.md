@@ -1,6 +1,7 @@
 # demo_content_aggregator
 It is test task by applying for job.  
-## Description  
+## The task description
+*I have received it on russian language.*  
 Технологии:
 - aiohttp 
 - postgresql 
@@ -16,23 +17,32 @@ It is test task by applying for job.
 2. Страница с блоками. На странице выводятся блоки и счетчики показа блоков. 
 Добавление, изменение, удаление делать не нужно. Нужно сделать фикстуру, которая заполнит таблицы в базе, чтобы можно было развернуть проект и продемонстрировать его работу.	
 Для каждого контент блока нужно подсчитывать, сколько раз он показывался пользователю.
-   
+
+## Run
+With Docker:  
+1. Follow to project directory (Directory contains README.md file).
+2. Execute: `sudo docker-compose up`  
+
+ Without Docker:
+1. Run DB instance.
+2. Install [requirements](#install-requirements)
+3. Specify `.env.yaml` or environment variable.
+4. Follow to project directory (Directory contains README.md file).
+5. Exec `python ./content_aggregator/content_aggregator.py -p .env.yaml`
+
 ## Install requirements
+**It doesn't necessary if you use Docker & docker-compose.**
 1. Follow to project directory (Directory contains README.md file).
 2. Create or activate environment python by any way.
 3. Production requirements: `python setup.py install`.
 4. Test requirements: `pip install -e .[test]` (if necessary).
-   
-## Run
-1. Follow to project directory (Directory contains README.md file).
-2. Execute: `sudo docker-compose up` 
 
 ## Sources
-* /content_aggregator/content_aggregator.py - main module  
+* /content_aggregator/content_aggregator.py - main module with a business logic.  
   Project submodules:
-* /mypackages/logging_repository.py
-* /mypackages/peewee_models.py
-* /mypackages/settings_loader.py
+* /mypackages/logging_repository.py - logging to console, file, logstash.
+* /mypackages/peewee_models.py - the data model for peewee ORM.
+* /mypackages/settings_loader.py - configure from setting file and env variables.  
 
 ### Configure files
 * .db_env.yaml - config for db  
@@ -41,12 +51,14 @@ It is test task by applying for job.
 ## Migration
 1. Follow to project directory (Directory contains README.md file).
 2. Create or activate environment python by any way.
-3. Execute: `python ./fixture.py -p ./.env.yaml`
+3. Execute: `python ./fixture.py -p ./.env.yaml` or 
+   if you use docker-compose `docker-compose aggregator exec python ./fixture.py -p ./.env.yaml`
 
 ## Fixture
 1. Follow to project directory (Directory contains README.md file).
 2. Create or activate environment python by any way.
-3. Execute: `python ./fixture.py -p ./.env.yaml -f`
+3. Execute: `python ./fixture.py -p ./.env.yaml -f` or
+   if you use docker-compose `docker-compose aggregator exec python ./fixture.py -p ./.env.yaml -f `
 
 ## RUN TEST 
     pass

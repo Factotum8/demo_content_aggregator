@@ -9,7 +9,7 @@ from collections import ChainMap
 
 import yaml
 
-__all__ = ('load_config', )
+__all__ = ('load_config',)
 
 
 def remove_prefix(text, prefix):
@@ -21,11 +21,14 @@ def remove_prefix(text, prefix):
 
 def without_prefix(func):
     """
-    Remove prefix and convert to lowercase
+    Remove prefix and convert to lowercase.
+    You may cut some prefix from all variable if you want.
+    For example:
+    AGGREGATOR_LOGGING_LOGSTASH_HOST -> logging_logstash_host
+    LOGGING_LOGSTASH_HOST            -> logging_logstash_host
     """
-
     @functools.wraps(func)
-    def wrapper(*, prefix, path_to_config):
+    def wrapper(*, path_to_config, prefix=''):
         return {remove_prefix(k, prefix).lower(): v for k, v in func(path_to_config).items()}
 
     return wrapper

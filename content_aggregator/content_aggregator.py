@@ -4,7 +4,6 @@
 The main executable module
 """
 import argparse
-from typing import Dict, Union
 
 from aiohttp import web
 
@@ -17,7 +16,7 @@ class ServerAggregator:
     """
     Main class
     """
-    def __init__(self, config: Dict[str, Union[str, int]]):
+    def __init__(self, config: dict[str, str | int]):
         self.log = None
         self._config = config
         self.logging_repository_ = logging_repository.LoggingRepository(dict(tag='DemoAggregatorServer',
@@ -103,8 +102,7 @@ class ServerAggregator:
 
 
 def main(path_to_config: str):
-    manager_server = ServerAggregator(settings_loader.load_config(prefix=peewee_models.ENV_PREFIX,
-                                                                  path_to_config=path_to_config))
+    manager_server = ServerAggregator(settings_loader.load_config(path_to_config=path_to_config))
     manager_server.listen()
 
 

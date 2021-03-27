@@ -38,7 +38,7 @@ def main(path, with_fixture=False):
     Init migration
     inset test data
     """
-    config = settings_loader.load_config(prefix=ENV_PREFIX, path_to_config=path)
+    config = settings_loader.load_config(path_to_config=path)
     database = get_postgresql_database(config)
     DATABASE.initialize(database)
     DATABASE.connect()

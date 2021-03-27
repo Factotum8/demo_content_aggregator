@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 # coding=utf-8
 """
-Toolkit for get ip address, logging, extra dict
+In module there is a universal logging logic. It is passed from project to project.
+Some toolkit for get ip address and logstash extra dict
 """
 import sys
 import socket
@@ -30,6 +31,9 @@ def get_host_ip(dst=None, port=None):
 
 
 class LoggingRepository:
+    """
+    The class which builds log obj.
+    """
 
     def __init__(self, extra: dict, ping_host=None, ping_port=None, config: dict = None):
         self._extra = {'host': get_host_ip(ping_host, ping_port), **extra}
@@ -88,7 +92,6 @@ class LoggingRepository:
             log_handler.setFormatter(format_obj)
             handlers.append(log_handler)
 
-            # example self.log.setLevel(logging.WARNING)
             log.setLevel(config['logging_level'].upper())
 
             list(map(log.addHandler, handlers))  # Added all handlers to logger

@@ -1,7 +1,17 @@
 #!/usr/bin/env python3
 # coding=utf-8
-"""
-Models for ORM peewee-async
+r"""
+The module is models for ORM peewee-async.
+There are 3 tables:
+-------- | ----------------------- | -------
+Pages    | PagesBlocksRelationship | Blocks
+-------- | ----------------------- | -------
+name     | page_id                 | name
+slug     | block_id                | links
+order_by | order_by                | viewed_count
+-------- | ----------------------- | -------
+'Pages' & 'Blocks' were connected by 'PagesBlocksRelationship'.
+The classes: BaseSchema, PagesSchema, BlocksSchema, RelationshipSchema just are serializers.
 """
 import peewee
 import peewee_asyncext
@@ -11,9 +21,8 @@ from playhouse.postgres_ext import JSONField
 from marshmallow_peewee import ModelSchema
 
 __all__ = ['PeeweeException', 'BaseRepositoryPeeweeException', 'PeeweeRepositoryBuilder', 'Manager', 'Pages', 'Blocks',
-           'DoesNotExist', 'DATABASE', 'get_postgresql_database', 'PagesBlocksRelationship', 'ENV_PREFIX']
+           'DoesNotExist', 'DATABASE', 'get_postgresql_database', 'PagesBlocksRelationship']
 
-ENV_PREFIX = 'AGGREGATOR_'  # We delete this prefix from environment variables
 # This instruction is the correct way to dynamically defining a database
 DATABASE = peewee.DatabaseProxy()
 
@@ -27,7 +36,7 @@ class BaseRepositoryPeeweeException(Exception):
 
 class BaseModel(peewee.Model):
     """
-    model definitions -- the standard "pattern" is to define a base model class
+    model definitions - the standard "pattern" is to define a base model class
     that specifies which database to use.  then, any subclasses will automatically
     use the correct storage.
     """
@@ -64,10 +73,10 @@ class Pages(BaseModel):
     order_by = peewee.SmallIntegerField(null=True, db_column='order_by', help_text='order for viewing', index=True)
 
     async def model_to_json(self, **kwargs) -> str:
-        return PagesSchema(**kwargs).dumps(self)
+        return PagesSerializerSchema(**kwargs).dumps(self)
 
     async def model_to_dict(self, **kwargs) -> dict:
-        return PagesSchema(**kwargs).dump(self)
+        return PagesSerializerSchema(**kwargs).dump(self)
 
 
 class Blocks(BaseModel):
@@ -79,10 +88,10 @@ class Blocks(BaseModel):
     viewed_count = peewee.IntegerField(null=True, db_column='viewed_count', help_text='contain viewed count')
 
     async def model_to_json(self, **kwargs) -> str:
-        return BlocksSchema(**kwargs).dumps(self)
+        return BlocksSerializerSchema(**kwargs).dumps(self)
 
     async def model_to_dict(self, **kwargs) -> dict:
-        return BlocksSchema(**kwargs).dump(self)
+        return BlocksSerializerSchema(**kwargs).dump(self)
 
     async def model_to_dict_and_inc_viewed(self, **kwargs) -> dict:
         """
@@ -110,7 +119,7 @@ class PagesBlocksRelationship(BaseModel):
         )
 
     async def model_to_json(self, **kwargs) -> str:
-        return RelationshipSchema(**kwargs).dumps(self)
+        return RelationshipSerializerSchema(**kwargs).dumps(self)
 
 
 class PeeweeRepositoryBuilder:
@@ -147,23 +156,32 @@ class PeeweeRepositoryBuilder:
         return module.get_postgresql_database(config)
 
 
-class BaseSchema(ModelSchema):
+class BaseSerializerSchema(ModelSchema):
     """
-    Base marshmallow schema
+    Base marshmallow schema for serializer
     """
 
 
-class PagesSchema(BaseSchema):
+class PagesSerializerSchema(BaseSerializerSchema):
+    """
+    serializer from ORM obj to json obj
+    """
     class Meta:
         model = Pages
 
 
-class BlocksSchema(BaseSchema):
+class BlocksSerializerSchema(BaseSerializerSchema):
+    """
+    serializer from ORM obj to json obj
+    """
     class Meta:
         model = Blocks
 
 
-class RelationshipSchema(BaseSchema):
+class RelationshipSerializerSchema(BaseSerializerSchema):
+    """
+    serializer from ORM obj to json obj
+    """
     class Meta:
         model = PagesBlocksRelationship
 
