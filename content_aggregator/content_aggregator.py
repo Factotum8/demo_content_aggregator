@@ -6,6 +6,8 @@ The main executable module
 import argparse
 
 from aiohttp import web
+from aiohttp.web import middleware
+from aiohttp.web import HTTPException
 
 from mypackages import peewee_models
 from mypackages import settings_loader
@@ -29,7 +31,7 @@ class ServerAggregator:
         self._database = peewee_models.PeeweeRepositoryBuilder()(peewee_models, config)  # init db connect
         self.dao = peewee_models.Manager(self._database)  # init data access object
 
-        self._app = web.Application()
+        self._app = web.Application(middlewares=[self.middleware])
         self._app.on_startup.append(self._initialize)
         self._app.on_shutdown.append(self._terminate)
 
@@ -89,6 +91,14 @@ class ServerAggregator:
             for p in pages_obj]
 
         return web.json_response(pages_serialize)
+
+    @middleware
+    async def middleware(self, request, handler):
+        try:
+            resp = await handler(request)
+            return resp
+        except HTTPException as e:
+            return web.json_response({e.status_code: e.reason})
 
     async def _initialize(self, app):
         self.log.info('Server is starting')

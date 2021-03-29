@@ -17,6 +17,25 @@ It is test task by applying for job.
 2. Страница с блоками. На странице выводятся блоки и счетчики показа блоков. 
 Добавление, изменение, удаление делать не нужно. Нужно сделать фикстуру, которая заполнит таблицы в базе, чтобы можно было развернуть проект и продемонстрировать его работу.	
 Для каждого контент блока нужно подсчитывать, сколько раз он показывался пользователю.
+   
+## Example
+Request:  
+`
+curl -s localhost:8072/pages | jq
+`  
+Reply:  
+`
+[
+  {
+    "name": "main_page",
+    "link": "http://localhost:8072/page/main_page_slug"
+  },
+  {
+    "name": "second_page",
+    "link": "http://localhost:8072/page/second_page_slug"
+  }
+]
+`
 
 ## Run
 With Docker:  
@@ -52,13 +71,13 @@ With Docker:
 1. Follow to project directory (Directory contains README.md file).
 2. Create or activate environment python by any way.
 3. Execute: `python ./fixture.py -p ./.env.yaml` or 
-   if you use docker-compose `docker-compose aggregator exec python ./fixture.py -p ./.env.yaml`
+   if you use docker-compose `docker-compose exec aggregator python ./fixture.py -p ./.env.yaml`
 
 ## Fixture
 1. Follow to project directory (Directory contains README.md file).
 2. Create or activate environment python by any way.
 3. Execute: `python ./fixture.py -p ./.env.yaml -f` or
-   if you use docker-compose `docker-compose aggregator exec python ./fixture.py -p ./.env.yaml -f `
+   if you use docker-compose `docker-compose exec aggregator python ./fixture.py -p ./.env.yaml -f`
 
 ## RUN TEST 
     pass
