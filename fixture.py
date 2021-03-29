@@ -6,8 +6,7 @@ Models for ORM peewee-async
 import argparse
 
 from mypackages import settings_loader
-from mypackages.peewee_models import (DATABASE, get_postgresql_database, Pages, Blocks, PagesBlocksRelationship,
-                                      ENV_PREFIX)
+from mypackages.peewee_models import (DATABASE, get_postgresql_database, Pages, Blocks, PagesBlocksRelationship,)
 
 
 def create_fixture():

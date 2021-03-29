@@ -16,7 +16,7 @@ services:
     - "5432:5432"
 
   aggregator:
-    container_name: web
+    container_name: aggregator
     build: .
 #    restart: always
     ports:

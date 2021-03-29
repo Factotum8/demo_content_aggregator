@@ -16,7 +16,7 @@ class ServerAggregator:
     """
     Main class
     """
-    def __init__(self, config: dict[str, str | int]):
+    def __init__(self, config: dict[str, [str, int]]):
         self.log = None
         self._config = config
         self.logging_repository_ = logging_repository.LoggingRepository(dict(tag='DemoAggregatorServer',
@@ -65,8 +65,12 @@ class ServerAggregator:
             self.log.error(f"connection DB error: {e}")
             raise
 
+        # update all blocks at once
+        if not bool(await peewee_models.Blocks.multiple_obj_inc_viewed(blocks_obj)):
+            self.log.error(f'for page {page_obj} the blocks viewing update is failed')
+
         # You can specify which fields to output with the only parameter: b.model_to_dict(only=['id'])
-        blocks_serialize = [await b.model_to_dict_and_inc_viewed() for b in blocks_obj]
+        blocks_serialize = [await b.model_to_dict() for b in blocks_obj]
         return web.json_response(blocks_serialize)
 
     async def _pages_handler(self, request):
