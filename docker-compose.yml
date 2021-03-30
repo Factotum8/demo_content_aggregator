@@ -10,15 +10,13 @@ services:
       - postgres_data:/var/lib/postgresql/data/
     env_file:
       - ./.db_env.yaml
-#    expose:
-#      - 5432
-    ports:
-    - "5432:5432"
+    expose:
+      - 5432
 
   aggregator:
     container_name: aggregator
     build: .
-#    restart: always
+    restart: always
     ports:
       - "8072:8072"
     depends_on:
