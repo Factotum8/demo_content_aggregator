@@ -111,7 +111,6 @@ class Blocks(BaseModel):
         return await self.model_to_dict(**kwargs)
 
     @classmethod
-    # async def multiple_obj_inc_viewed(cls, objects: tuple['Blocks']) -> Union[None, int]:
     async def multiple_obj_inc_viewed(cls, objects: tuple['Blocks']) -> Union[None, int]:
         # see https://peewee.readthedocs.io/en/latest/peewee/query_operators.html
         query = Blocks.update(viewed_count=Blocks.viewed_count+1).where(Blocks.sell_currency << [b.id for b in objects])
